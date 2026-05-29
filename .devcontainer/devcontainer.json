@@ -1,10 +1,10 @@
 {
-  "name": "plugin-template",
+  "name": "plugin-figma",
   "build": {
     "context": ".",
     "dockerfile": "Dockerfile"
   },
-  "workspaceFolder": "/workspaces/plugin-template",
+  "workspaceFolder": "/workspaces/plugin-figma",
   "forwardPorts": [8080],
   "customizations": {
     "vscode": {
