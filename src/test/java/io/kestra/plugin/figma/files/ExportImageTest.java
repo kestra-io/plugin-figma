@@ -14,7 +14,9 @@ import java.util.Map;
 import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
@@ -34,6 +36,16 @@ class ExportImageTest {
     @Inject
     private RunContextFactory runContextFactory;
 
+    private ExportImage.ExportImageBuilder<?, ?> newTaskBuilder() {
+        return ExportImage.builder()
+            .id(UUID.randomUUID().toString())
+            .type(ExportImage.class.getName())
+            .accessToken(Property.ofValue("token"))
+            .baseUrl(Property.ofValue(wireMock.getRuntimeInfo().getHttpBaseUrl()))
+            .fileKey(Property.ofValue("abc123"))
+            .nodeIds(Property.ofValue(List.of("1:2")));
+    }
+
     @Test
     void run() throws Exception {
         wireMock.stubFor(get(urlPathEqualTo("/images/abc123"))
@@ -44,14 +56,7 @@ class ExportImageTest {
         wireMock.stubFor(get(urlPathEqualTo("/downloads/1-2.png"))
             .willReturn(aResponse().withStatus(200).withBody(new byte[]{1, 2, 3})));
 
-        ExportImage task = ExportImage.builder()
-            .id(UUID.randomUUID().toString())
-            .type(ExportImage.class.getName())
-            .accessToken(Property.ofValue("token"))
-            .baseUrl(Property.ofValue(wireMock.getRuntimeInfo().getHttpBaseUrl()))
-            .fileKey(Property.ofValue("abc123"))
-            .nodeIds(Property.ofValue(List.of("1:2")))
-            .build();
+        ExportImage task = newTaskBuilder().build();
 
         RunContext runContext = runContextFactory.of(task, Map.of());
 
@@ -63,19 +68,52 @@ class ExportImageTest {
 
     @Test
     void emptyNodeIds() throws Exception {
-        ExportImage task = ExportImage.builder()
-            .id(UUID.randomUUID().toString())
-            .type(ExportImage.class.getName())
-            .accessToken(Property.ofValue("token"))
-            .baseUrl(Property.ofValue(wireMock.getRuntimeInfo().getHttpBaseUrl()))
-            .fileKey(Property.ofValue("abc123"))
-            .nodeIds(Property.ofValue(List.of()))
-            .build();
+        ExportImage task = newTaskBuilder().nodeIds(Property.ofValue(List.of())).build();
 
         RunContext runContext = runContextFactory.of(task, Map.of());
 
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> task.run(runContext));
         assertThat(e.getMessage(), containsString("nodeIds"));
+    }
+
+    @Test
+    void validScaleIsForwardedToTheApi() throws Exception {
+        wireMock.stubFor(get(urlPathEqualTo("/images/abc123"))
+            .willReturn(okJson("""
+                {"err": null, "images": {"1:2": "%s/downloads/scaled-1-2.png"}}
+                """.formatted(wireMock.getRuntimeInfo().getHttpBaseUrl()))));
+
+        wireMock.stubFor(get(urlPathEqualTo("/downloads/scaled-1-2.png"))
+            .willReturn(aResponse().withStatus(200).withBody(new byte[]{1, 2, 3})));
+
+        ExportImage task = newTaskBuilder().scale(Property.ofValue(2.0)).build();
+
+        RunContext runContext = runContextFactory.of(task, Map.of());
+
+        ExportImage.Output output = task.run(runContext);
+
+        assertThat(output.getImages(), aMapWithSize(1));
+        wireMock.verify(getRequestedFor(urlPathEqualTo("/images/abc123")).withQueryParam("scale", equalTo("2.0")));
+    }
+
+    @Test
+    void scaleBelowMinimumIsRejected() throws Exception {
+        ExportImage task = newTaskBuilder().scale(Property.ofValue(0.001)).build();
+
+        RunContext runContext = runContextFactory.of(task, Map.of());
+
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> task.run(runContext));
+        assertThat(e.getMessage(), containsString("scale"));
+    }
+
+    @Test
+    void scaleAboveMaximumIsRejected() throws Exception {
+        ExportImage task = newTaskBuilder().scale(Property.ofValue(5.0)).build();
+
+        RunContext runContext = runContextFactory.of(task, Map.of());
+
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> task.run(runContext));
+        assertThat(e.getMessage(), containsString("scale"));
     }
 
     @Test
@@ -85,14 +123,7 @@ class ExportImageTest {
                 {"err": null, "images": {"1:2": null}}
                 """)));
 
-        ExportImage task = ExportImage.builder()
-            .id(UUID.randomUUID().toString())
-            .type(ExportImage.class.getName())
-            .accessToken(Property.ofValue("token"))
-            .baseUrl(Property.ofValue(wireMock.getRuntimeInfo().getHttpBaseUrl()))
-            .fileKey(Property.ofValue("abc123"))
-            .nodeIds(Property.ofValue(List.of("1:2")))
-            .build();
+        ExportImage task = newTaskBuilder().build();
 
         RunContext runContext = runContextFactory.of(task, Map.of());
 

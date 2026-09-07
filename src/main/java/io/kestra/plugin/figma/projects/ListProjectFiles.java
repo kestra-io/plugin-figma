@@ -74,7 +74,7 @@ public class ListProjectFiles extends AbstractFigmaTask implements RunnableTask<
         Map<String, String> params = new LinkedHashMap<>();
         runContext.render(this.branchData).as(Boolean.class).ifPresent(b -> params.put("branch_data", String.valueOf(b)));
 
-        JsonNode response = this.get(runContext, "/projects/" + rProjectId + "/files" + FigmaApi.queryString(params));
+        JsonNode response = this.get(runContext, "/projects/" + FigmaApi.encodePathSegment(rProjectId) + "/files" + FigmaApi.queryString(params));
         JsonNode files = response.path("files");
 
         FetchType rFetchType = runContext.render(this.fetchType).as(FetchType.class).orElse(FetchType.FETCH);

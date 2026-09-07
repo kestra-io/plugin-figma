@@ -9,6 +9,7 @@ import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.models.tasks.common.FetchType;
 import io.kestra.core.runners.RunContext;
 import io.kestra.plugin.figma.AbstractFigmaTask;
+import io.kestra.plugin.figma.FigmaApi;
 import io.kestra.plugin.figma.FigmaFetchOutput;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
@@ -63,7 +64,7 @@ public class ListTeamProjects extends AbstractFigmaTask implements RunnableTask<
         String rTeamId = runContext.render(this.teamId).as(String.class)
             .orElseThrow(() -> new IllegalArgumentException("Missing required `teamId` property"));
 
-        JsonNode response = this.get(runContext, "/teams/" + rTeamId + "/projects");
+        JsonNode response = this.get(runContext, "/teams/" + FigmaApi.encodePathSegment(rTeamId) + "/projects");
         JsonNode projects = response.path("projects");
 
         FetchType rFetchType = runContext.render(this.fetchType).as(FetchType.class).orElse(FetchType.FETCH);

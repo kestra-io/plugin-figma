@@ -8,6 +8,7 @@ import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.models.tasks.VoidOutput;
 import io.kestra.core.runners.RunContext;
 import io.kestra.plugin.figma.AbstractFigmaTask;
+import io.kestra.plugin.figma.FigmaApi;
 import io.kestra.plugin.figma.FigmaApiException;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
@@ -64,7 +65,7 @@ public class DeleteComment extends AbstractFigmaTask implements RunnableTask<Voi
             .orElseThrow(() -> new IllegalArgumentException("Missing required `commentId` property"));
 
         try {
-            this.delete(runContext, "/files/" + rFileKey + "/comments/" + rCommentId);
+            this.delete(runContext, "/files/" + FigmaApi.encodePathSegment(rFileKey) + "/comments/" + FigmaApi.encodePathSegment(rCommentId));
         } catch (FigmaApiException e) {
             if (e.getStatusCode() == 404) {
                 throw new FigmaApiException(

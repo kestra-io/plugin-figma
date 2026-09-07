@@ -103,7 +103,7 @@ public class GetFile extends AbstractFigmaTask implements RunnableTask<FigmaFetc
         runContext.render(this.fileVersion).as(String.class).ifPresent(v -> params.put("version", v));
         runContext.render(this.branchData).as(Boolean.class).ifPresent(b -> params.put("branch_data", String.valueOf(b)));
 
-        JsonNode file = this.get(runContext, "/files/" + rFileKey + FigmaApi.queryString(params));
+        JsonNode file = this.get(runContext, "/files/" + FigmaApi.encodePathSegment(rFileKey) + FigmaApi.queryString(params));
 
         FetchType rFetchType = runContext.render(this.fetchType).as(FetchType.class).orElse(FetchType.STORE);
 

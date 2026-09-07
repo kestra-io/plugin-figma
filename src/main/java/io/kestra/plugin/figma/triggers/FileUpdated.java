@@ -26,6 +26,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+import org.slf4j.Logger;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -84,9 +85,10 @@ public class FileUpdated extends AbstractTrigger implements PollingTriggerInterf
     @Schema(
         title = "Figma access token",
         description = """
-            A personal access token generated from your Figma account settings, scoped to at least \
-            file read access. A valid OAuth 2.0 access token obtained through your own authorization \
-            flow also works — this plugin does not implement the OAuth flow itself."""
+            A personal access token generated from your Figma account settings (Account Settings > \
+            Personal access tokens), scoped to at least file read access. A valid OAuth 2.0 access \
+            token obtained through your own authorization flow also works — this plugin does not \
+            implement the OAuth flow itself, only PAT-style bearer tokens passed as-is."""
     )
     @PluginProperty(group = "connection", secret = true)
     @ToString.Exclude
@@ -106,6 +108,7 @@ public class FileUpdated extends AbstractTrigger implements PollingTriggerInterf
     @Override
     public Optional<Execution> evaluate(ConditionContext conditionContext, TriggerContext triggerContext) throws Exception {
         RunContext runContext = conditionContext.getRunContext();
+        Logger logger = runContext.logger();
 
         String rFileKey = runContext.render(this.fileKey).as(String.class)
             .orElseThrow(() -> new IllegalArgumentException("Missing required `fileKey` property"));
@@ -113,7 +116,8 @@ public class FileUpdated extends AbstractTrigger implements PollingTriggerInterf
             .orElseThrow(() -> new IllegalArgumentException("Missing required `accessToken` property"));
         String rBaseUrl = runContext.render(this.baseUrl).as(String.class).orElse(FigmaApi.DEFAULT_BASE_URL);
 
-        JsonNode file = FigmaApi.request(runContext, rBaseUrl, rAccessToken, "GET", "/files/" + rFileKey + "?depth=1", null);
+        logger.debug("Polling Figma file '{}' for changes", rFileKey);
+        JsonNode file = FigmaApi.request(runContext, rBaseUrl, rAccessToken, "GET", "/files/" + FigmaApi.encodePathSegment(rFileKey) + "?depth=1", null);
 
         String lastModified = file.path("lastModified").asText(null);
         if (lastModified == null) {
@@ -137,6 +141,8 @@ public class FileUpdated extends AbstractTrigger implements PollingTriggerInterf
         }
 
         kvStore.put(watermarkKey, new KVValueAndMetadata(new KVMetadata(null, (Duration) null), lastModified), true);
+
+        logger.info("Figma file '{}' changed, lastModified advanced from '{}' to '{}'", rFileKey, previous, current);
 
         Execution execution = TriggerService.generateExecution(this, conditionContext, triggerContext, Output.builder()
             .fileKey(rFileKey)

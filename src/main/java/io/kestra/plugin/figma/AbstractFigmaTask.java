@@ -106,7 +106,7 @@ public abstract class AbstractFigmaTask extends Task {
 
             return switch (fetchType) {
                 case FETCH -> output.rows(rows).size(total).total(total).build();
-                case FETCH_ONE -> output.row(rows.isEmpty() ? null : toMap(rows.get(0))).total(total).build();
+                case FETCH_ONE -> output.row(rows.isEmpty() ? null : toMap(rows.getFirst())).total(total).build();
                 case STORE -> output.uri(store(runContext, node)).size(total).total(total).build();
                 case NONE -> output.build();
             };

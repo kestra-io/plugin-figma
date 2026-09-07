@@ -15,6 +15,7 @@ import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
 import io.kestra.plugin.figma.AbstractFigmaTask;
 import io.kestra.plugin.figma.FigmaApi;
+import io.kestra.plugin.figma.FigmaApiException;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -23,6 +24,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.net.URI;
@@ -121,7 +123,7 @@ public class ExportImage extends AbstractFigmaTask implements RunnableTask<Expor
         runContext.render(this.svgIncludeId).as(Boolean.class).ifPresent(b -> params.put("svg_include_id", String.valueOf(b)));
         runContext.render(this.useAbsoluteBounds).as(Boolean.class).ifPresent(b -> params.put("use_absolute_bounds", String.valueOf(b)));
 
-        JsonNode response = this.get(runContext, "/images/" + rFileKey + FigmaApi.queryString(params));
+        JsonNode response = this.get(runContext, "/images/" + FigmaApi.encodePathSegment(rFileKey) + FigmaApi.queryString(params));
 
         if (response.hasNonNull("err")) {
             throw new IllegalStateException("Figma image export failed: " + response.get("err").asText());
@@ -157,6 +159,9 @@ public class ExportImage extends AbstractFigmaTask implements RunnableTask<Expor
     }
 
     private URI downloadToStorage(RunContext runContext, String nodeId, String url, String extension) throws IllegalVariableEvaluationException, IOException {
+        Logger logger = runContext.logger();
+        logger.debug("Downloading exported image for node '{}'", nodeId);
+
         HttpRequest request = HttpRequest.builder().uri(URI.create(url)).build();
         AtomicReference<URI> stored = new AtomicReference<>();
         AtomicReference<IOException> failure = new AtomicReference<>();
@@ -170,8 +175,11 @@ public class ExportImage extends AbstractFigmaTask implements RunnableTask<Expor
                 }
             });
         } catch (HttpClientResponseException e) {
-            throw FigmaApi.mapError(e);
+            FigmaApiException mapped = FigmaApi.mapError(e);
+            logger.error("Failed to download exported image for node '{}': {}", nodeId, mapped.getMessage());
+            throw mapped;
         } catch (HttpClientException e) {
+            logger.error("Failed to download exported image for node '{}': {}", nodeId, e.getMessage());
             throw new IOException("Failed to download exported image for node '" + nodeId + "': " + e.getMessage(), e);
         }
 

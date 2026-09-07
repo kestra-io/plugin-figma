@@ -74,7 +74,7 @@ public class ListComments extends AbstractFigmaTask implements RunnableTask<Figm
         Map<String, String> params = new LinkedHashMap<>();
         runContext.render(this.asMd).as(Boolean.class).ifPresent(b -> params.put("as_md", String.valueOf(b)));
 
-        JsonNode response = this.get(runContext, "/files/" + rFileKey + "/comments" + FigmaApi.queryString(params));
+        JsonNode response = this.get(runContext, "/files/" + FigmaApi.encodePathSegment(rFileKey) + "/comments" + FigmaApi.queryString(params));
         JsonNode comments = response.path("comments");
 
         FetchType rFetchType = runContext.render(this.fetchType).as(FetchType.class).orElse(FetchType.FETCH);

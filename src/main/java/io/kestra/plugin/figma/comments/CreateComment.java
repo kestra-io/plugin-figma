@@ -8,6 +8,7 @@ import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
 import io.kestra.plugin.figma.AbstractFigmaTask;
+import io.kestra.plugin.figma.FigmaApi;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -88,7 +89,7 @@ public class CreateComment extends AbstractFigmaTask implements RunnableTask<Cre
             body.put("client_meta", rClientMeta);
         }
 
-        JsonNode response = this.post(runContext, "/files/" + rFileKey + "/comments", body);
+        JsonNode response = this.post(runContext, "/files/" + FigmaApi.encodePathSegment(rFileKey) + "/comments", body);
 
         String id = response.path("id").asText(null);
         if (id == null) {

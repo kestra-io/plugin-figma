@@ -8,6 +8,7 @@ import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
 import io.kestra.plugin.figma.AbstractFigmaTask;
+import io.kestra.plugin.figma.FigmaApi;
 import io.kestra.plugin.figma.FigmaApiException;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
@@ -102,7 +103,7 @@ public class UpdateVariables extends AbstractFigmaTask implements RunnableTask<U
 
         JsonNode response;
         try {
-            response = this.post(runContext, "/files/" + rFileKey + "/variables", body);
+            response = this.post(runContext, "/files/" + FigmaApi.encodePathSegment(rFileKey) + "/variables", body);
         } catch (FigmaApiException e) {
             throw this.enterprisePlanError(e);
         }

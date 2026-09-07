@@ -9,6 +9,7 @@ import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.models.tasks.common.FetchType;
 import io.kestra.core.runners.RunContext;
 import io.kestra.plugin.figma.AbstractFigmaTask;
+import io.kestra.plugin.figma.FigmaApi;
 import io.kestra.plugin.figma.FigmaApiException;
 import io.kestra.plugin.figma.FigmaFetchOutput;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -71,7 +72,7 @@ public class GetPublishedVariables extends AbstractFigmaTask implements Runnable
 
         JsonNode response;
         try {
-            response = this.get(runContext, "/files/" + rFileKey + "/variables/published");
+            response = this.get(runContext, "/files/" + FigmaApi.encodePathSegment(rFileKey) + "/variables/published");
         } catch (FigmaApiException e) {
             throw this.enterprisePlanError(e);
         }

@@ -9,6 +9,7 @@ import io.kestra.core.models.property.Property;
 import io.kestra.core.models.triggers.TriggerContext;
 import io.kestra.core.runners.DefaultRunContext;
 import io.kestra.core.runners.RunContextFactory;
+import io.kestra.plugin.figma.FigmaApiException;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -17,12 +18,15 @@ import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @KestraTest
 class FileUpdatedTest {
@@ -140,5 +144,41 @@ class FileUpdatedTest {
         // a re-poll with the same (now current) lastModified must not fire again
         Optional<Execution> replay = trigger.evaluate(conditionContext, triggerContext);
         assertThat(replay.isPresent(), is(false));
+    }
+
+    @Test
+    void forbiddenPollFailsTheEvaluationInsteadOfStalling() {
+        String flowId = "flow_" + UUID.randomUUID().toString().replace("-", "");
+        String triggerId = "trigger_" + UUID.randomUUID().toString().replace("-", "");
+
+        FileUpdated trigger = newTrigger(triggerId);
+        TriggerContext triggerContext = newTriggerContext(flowId, triggerId);
+        ConditionContext conditionContext = newConditionContext(trigger, triggerContext);
+
+        wireMock.stubFor(get(urlPathEqualTo("/files/abc123"))
+            .willReturn(aResponse().withStatus(403).withBody("{\"err\": \"Forbidden\", \"status\": 403}")));
+
+        FigmaApiException e = assertThrows(FigmaApiException.class, () -> trigger.evaluate(conditionContext, triggerContext));
+
+        assertThat(e.getStatusCode(), is(403));
+        assertThat(e.getMessage(), containsString("403"));
+    }
+
+    @Test
+    void notFoundPollFailsTheEvaluationInsteadOfStalling() {
+        String flowId = "flow_" + UUID.randomUUID().toString().replace("-", "");
+        String triggerId = "trigger_" + UUID.randomUUID().toString().replace("-", "");
+
+        FileUpdated trigger = newTrigger(triggerId);
+        TriggerContext triggerContext = newTriggerContext(flowId, triggerId);
+        ConditionContext conditionContext = newConditionContext(trigger, triggerContext);
+
+        wireMock.stubFor(get(urlPathEqualTo("/files/abc123"))
+            .willReturn(aResponse().withStatus(404).withBody("{\"err\": \"Not found\", \"status\": 404}")));
+
+        FigmaApiException e = assertThrows(FigmaApiException.class, () -> trigger.evaluate(conditionContext, triggerContext));
+
+        assertThat(e.getStatusCode(), is(404));
+        assertThat(e.getMessage(), containsString("404"));
     }
 }

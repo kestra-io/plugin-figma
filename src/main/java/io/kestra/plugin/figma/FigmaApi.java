@@ -11,6 +11,7 @@ import io.kestra.core.http.client.HttpClientResponseException;
 import io.kestra.core.http.client.configurations.HttpConfiguration;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.serializers.JacksonMapper;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.net.URI;
@@ -48,6 +49,9 @@ public final class FigmaApi {
             requestBuilder.body(HttpRequest.JsonRequestBody.builder().content(jsonBody).build());
         }
 
+        Logger logger = runContext.logger();
+        logger.debug("Calling Figma API: {} {}", method, path);
+
         try (HttpClient client = HttpClient.builder().runContext(runContext).configuration(HttpConfiguration.builder().build()).build()) {
             // Requesting `byte[].class` would make the Kestra HTTP client try to Jackson-deserialize
             // the JSON body *into* a byte array (it only special-cases `Byte[].class`, not the
@@ -55,8 +59,11 @@ public final class FigmaApi {
             HttpResponse<String> response = client.request(requestBuilder.build(), String.class);
             return parseBody(response.getBody());
         } catch (HttpClientResponseException e) {
-            throw mapError(e);
+            FigmaApiException mapped = mapError(e);
+            logger.error("Figma API call failed: {} {} -> {}", method, path, mapped.getMessage());
+            throw mapped;
         } catch (HttpClientException e) {
+            logger.error("Failed to call the Figma API at '{}': {}", path, e.getMessage());
             throw new IOException("Failed to call the Figma API at '" + path + "': " + e.getMessage(), e);
         }
     }
@@ -102,6 +109,15 @@ public final class FigmaApi {
         }
 
         return new FigmaApiException("Figma API " + code + ": " + detail, code);
+    }
+
+    /**
+     * Encodes a single path segment (a file key, project ID, team ID, comment ID, ...) the same
+     * way {@link #queryString} already encodes query values, so identifiers containing reserved
+     * URI characters (e.g. `/`, `?`, `#`) don't corrupt the request path.
+     */
+    public static String encodePathSegment(String segment) {
+        return URLEncoder.encode(segment, StandardCharsets.UTF_8).replace("+", "%20");
     }
 
     public static String queryString(Map<String, String> params) {
