@@ -25,13 +25,13 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "List the projects of a Figma team.",
+    title = "List the projects of a Figma team",
     description = "Calls the Figma `GET /v1/teams/:team_id/projects` endpoint."
 )
 @Plugin(
     examples = {
         @Example(
-            title = "List all projects of a Figma team.",
+            title = "List all projects of a Figma team",
             full = true,
             code = """
                 id: figma_list_team_projects
@@ -48,12 +48,12 @@ import lombok.experimental.SuperBuilder;
 )
 public class ListTeamProjects extends AbstractFigmaTask implements RunnableTask<FigmaFetchOutput> {
     @NotNull
-    @Schema(title = "The Figma team ID.")
+    @Schema(title = "The Figma team ID")
     @PluginProperty(group = "main")
     private Property<String> teamId;
 
     @NotNull
-    @Schema(title = "How to handle the fetched projects.")
+    @Schema(title = "How to handle the fetched projects")
     @PluginProperty(group = "processing")
     @Builder.Default
     private Property<FetchType> fetchType = Property.ofValue(FetchType.FETCH);

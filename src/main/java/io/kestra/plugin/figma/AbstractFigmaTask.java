@@ -30,22 +30,20 @@ import java.util.Map;
 @NoArgsConstructor
 public abstract class AbstractFigmaTask extends Task {
     @Schema(
-        title = "Figma access token.",
+        title = "Figma access token",
         description = """
             A personal access token generated from your Figma account settings (Account Settings > \
             Personal access tokens), scoped to what the task needs to do. A valid OAuth 2.0 access \
             token obtained through your own authorization flow also works — this plugin does not \
             implement the OAuth flow itself, only PAT-style bearer tokens passed as-is."""
     )
-    // The `secret` attribute of `@PluginProperty` is not available on the Kestra core version this
-    // plugin targets (1.2.5); `@ToString.Exclude` below keeps the token out of logs/toString instead.
-    @PluginProperty(group = "connection")
+    @PluginProperty(group = "connection", secret = true)
     @ToString.Exclude
     @NotNull
     protected Property<String> accessToken;
 
     @Schema(
-        title = "Figma API base URL.",
+        title = "Figma API base URL",
         description = "Defaults to the public Figma REST API. Override only to point at a self-hosted proxy or a test server."
     )
     @PluginProperty(group = "connection")

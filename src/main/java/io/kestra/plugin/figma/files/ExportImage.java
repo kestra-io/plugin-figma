@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Export Figma nodes as images.",
+    title = "Export Figma nodes as images",
     description = """
         Calls the Figma `GET /v1/images/:key` endpoint, which returns temporary URLs (valid for \
         roughly 30 minutes) rather than image bytes. This task downloads every returned URL in the \
@@ -48,7 +48,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @Plugin(
     examples = {
         @Example(
-            title = "Export two nodes of a Figma file as PNG images.",
+            title = "Export two nodes of a Figma file as PNG images",
             full = true,
             code = """
                 id: figma_export_image
@@ -69,30 +69,30 @@ import java.util.concurrent.atomic.AtomicReference;
 )
 public class ExportImage extends AbstractFigmaTask implements RunnableTask<ExportImage.Output> {
     @NotNull
-    @Schema(title = "The Figma file key.", description = "Found in the file's URL: `https://www.figma.com/file/:fileKey/...`.")
+    @Schema(title = "The Figma file key", description = "Found in the file's URL: `https://www.figma.com/file/:fileKey/...`.")
     @PluginProperty(group = "main")
     private Property<String> fileKey;
 
     @NotNull
-    @Schema(title = "The node IDs to export.", description = "Must contain at least one ID — the Figma API returns a 400 error otherwise.")
+    @Schema(title = "The node IDs to export", description = "Must contain at least one ID — the Figma API returns a 400 error otherwise.")
     @PluginProperty(group = "main")
     private Property<List<String>> nodeIds;
 
     @NotNull
-    @Schema(title = "The output image format.")
+    @Schema(title = "The output image format")
     @PluginProperty(group = "processing")
     @Builder.Default
     private Property<ImageFormat> format = Property.ofValue(ImageFormat.PNG);
 
-    @Schema(title = "A scaling factor to apply to the exported image.", description = "Must be between `0.01` and `4`. Ignored for `SVG` and `PDF`.")
+    @Schema(title = "A scaling factor to apply to the exported image", description = "Must be between `0.01` and `4`. Ignored for `SVG` and `PDF`.")
     @PluginProperty(group = "processing")
     private Property<Double> scale;
 
-    @Schema(title = "Whether to include the node ID as an attribute on exported SVG elements.")
+    @Schema(title = "Whether to include the node ID as an attribute on exported SVG elements")
     @PluginProperty(group = "processing")
     private Property<Boolean> svgIncludeId;
 
-    @Schema(title = "Whether to use the full node bounding box, ignoring any clipping.")
+    @Schema(title = "Whether to use the full node bounding box, ignoring any clipping")
     @PluginProperty(group = "processing")
     private Property<Boolean> useAbsoluteBounds;
 
@@ -192,7 +192,7 @@ public class ExportImage extends AbstractFigmaTask implements RunnableTask<Expor
     @Builder
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
-        @Schema(title = "Map of node ID to the internal storage URI of the exported image.")
+        @Schema(title = "Map of node ID to the internal storage URI of the exported image")
         private final Map<String, URI> images;
     }
 }

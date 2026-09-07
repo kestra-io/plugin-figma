@@ -16,18 +16,18 @@ import java.util.Map;
 @Builder
 @Getter
 public class FigmaFetchOutput implements Output {
-    @Schema(title = "The list of fetched items.", description = "Populated when `fetchType` is `FETCH`.")
+    @Schema(title = "The list of fetched items", description = "Populated when `fetchType` is `FETCH`.")
     private final List<Object> rows;
 
-    @Schema(title = "The single fetched item.", description = "Populated when `fetchType` is `FETCH_ONE`.")
+    @Schema(title = "The single fetched item", description = "Populated when `fetchType` is `FETCH_ONE`.")
     private final Map<String, Object> row;
 
-    @Schema(title = "The internal storage URI of the stored payload.", description = "Populated when `fetchType` is `STORE`.")
+    @Schema(title = "The internal storage URI of the stored payload", description = "Populated when `fetchType` is `STORE`.")
     private final URI uri;
 
-    @Schema(title = "The number of items stored or fetched.")
+    @Schema(title = "The number of items stored or fetched")
     private final Long size;
 
-    @Schema(title = "The total number of items returned by the Figma API for this request.", description = "Only populated for list-shaped responses (e.g. comments, projects, files).")
+    @Schema(title = "The total number of items returned by the Figma API for this request", description = "Only populated for list-shaped responses (e.g. comments, projects, files).")
     private final Long total;
 }

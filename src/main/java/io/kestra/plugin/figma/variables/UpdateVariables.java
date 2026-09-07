@@ -28,7 +28,7 @@ import java.util.Map;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Create, update, or delete Figma variables and variable collections in bulk.",
+    title = "Create, update, or delete Figma variables and variable collections in bulk",
     description = """
         Calls the Figma `POST /v1/files/:file_key/variables` endpoint with the bulk-write envelope \
         (`variableCollections`, `variableModes`, `variables`, `variableModeValues`), matching the \
@@ -42,7 +42,7 @@ import java.util.Map;
 @Plugin(
     examples = {
         @Example(
-            title = "Create a variable collection and a variable in a Figma file (Enterprise plan required).",
+            title = "Create a variable collection and a variable in a Figma file (Enterprise plan required)",
             full = true,
             code = """
                 id: figma_update_variables
@@ -69,23 +69,23 @@ import java.util.Map;
 )
 public class UpdateVariables extends AbstractFigmaTask implements RunnableTask<UpdateVariables.Output> {
     @NotNull
-    @Schema(title = "The Figma file key.", description = "Found in the file's URL: `https://www.figma.com/file/:fileKey/...`.")
+    @Schema(title = "The Figma file key", description = "Found in the file's URL: `https://www.figma.com/file/:fileKey/...`.")
     @PluginProperty(group = "main")
     private Property<String> fileKey;
 
-    @Schema(title = "Variable collections to create, update, or delete.", description = "See the Figma API documentation for the `VariableCollection` change entry shape.")
+    @Schema(title = "Variable collections to create, update, or delete", description = "See the Figma API documentation for the `VariableCollection` change entry shape.")
     @PluginProperty(group = "main")
     private Property<List<Map<String, Object>>> variableCollections;
 
-    @Schema(title = "Variable modes to create, update, or delete.", description = "See the Figma API documentation for the `VariableMode` change entry shape.")
+    @Schema(title = "Variable modes to create, update, or delete", description = "See the Figma API documentation for the `VariableMode` change entry shape.")
     @PluginProperty(group = "main")
     private Property<List<Map<String, Object>>> variableModes;
 
-    @Schema(title = "Variables to create, update, or delete.", description = "See the Figma API documentation for the `Variable` change entry shape.")
+    @Schema(title = "Variables to create, update, or delete", description = "See the Figma API documentation for the `Variable` change entry shape.")
     @PluginProperty(group = "main")
     private Property<List<Map<String, Object>>> variables;
 
-    @Schema(title = "Variable values to set per mode.", description = "See the Figma API documentation for the `VariableModeValue` change entry shape.")
+    @Schema(title = "Variable values to set per mode", description = "See the Figma API documentation for the `VariableModeValue` change entry shape.")
     @PluginProperty(group = "main")
     private Property<List<Map<String, Object>>> variableModeValues;
 
@@ -123,7 +123,7 @@ public class UpdateVariables extends AbstractFigmaTask implements RunnableTask<U
     @Builder
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
-        @Schema(title = "Map of temporary ID to the real ID Figma assigned it.", description = "Only contains entries for `CREATE` actions that used a client-chosen temporary ID.")
+        @Schema(title = "Map of temporary ID to the real ID Figma assigned it", description = "Only contains entries for `CREATE` actions that used a client-chosen temporary ID.")
         private final Map<String, String> tempIdToRealId;
     }
 }

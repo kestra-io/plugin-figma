@@ -26,13 +26,13 @@ import java.util.Map;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Create a comment on a Figma file.",
+    title = "Create a comment on a Figma file",
     description = "Calls the Figma `POST /v1/files/:key/comments` endpoint. Provide `commentId` to reply to an existing comment, or `clientMeta` to pin the comment to a canvas position or a node."
 )
 @Plugin(
     examples = {
         @Example(
-            title = "Post a comment pinned to a canvas position on a Figma file.",
+            title = "Post a comment pinned to a canvas position on a Figma file",
             full = true,
             code = """
                 id: figma_create_comment
@@ -53,21 +53,21 @@ import java.util.Map;
 )
 public class CreateComment extends AbstractFigmaTask implements RunnableTask<CreateComment.Output> {
     @NotNull
-    @Schema(title = "The Figma file key.", description = "Found in the file's URL: `https://www.figma.com/file/:fileKey/...`.")
+    @Schema(title = "The Figma file key", description = "Found in the file's URL: `https://www.figma.com/file/:fileKey/...`.")
     @PluginProperty(group = "main")
     private Property<String> fileKey;
 
     @NotNull
-    @Schema(title = "The comment message.")
+    @Schema(title = "The comment message")
     @PluginProperty(group = "main")
     private Property<String> message;
 
-    @Schema(title = "The ID of the comment to reply to.", description = "Omit to create a new top-level comment.")
+    @Schema(title = "The ID of the comment to reply to", description = "Omit to create a new top-level comment.")
     @PluginProperty(group = "main")
     private Property<String> commentId;
 
     @Schema(
-        title = "The position to pin the comment to.",
+        title = "The position to pin the comment to",
         description = "Either a canvas position (`x`/`y`), or a node anchor (`node_id`, optionally with `node_offset`). See the Figma API documentation for the full `client_meta` shape."
     )
     @PluginProperty(group = "main")
@@ -101,7 +101,7 @@ public class CreateComment extends AbstractFigmaTask implements RunnableTask<Cre
     @Builder
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
-        @Schema(title = "The ID of the created comment.")
+        @Schema(title = "The ID of the created comment")
         private final String id;
     }
 }

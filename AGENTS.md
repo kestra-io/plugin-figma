@@ -64,8 +64,8 @@ plugin-figma/
 ## Local rules
 
 - Base the wording on the implemented packages and classes, not on template README text.
-- The `@PluginProperty` annotation on the Kestra core version this plugin targets (1.2.5) has no `secret` attribute. Secret fields (`accessToken`) rely on `@ToString.Exclude` instead, and this deviation is called out inline in code comments — do not add `@PluginProperty(secret = true)`, it will not compile against this version.
-- `@Min`/`@Max`/`@DecimalMin`/`@DecimalMax` bean-validation annotations on a `Property<Number>` field throw `jakarta.validation.UnexpectedTypeException` at task-run time on this Kestra version (no validator is wired for the constraint against the unwrapped `Property<T>` container). Bound numeric properties (e.g. `ExportImage.scale`) manually in the task's `run()` method instead, and document the bounds in `@Schema(description = ...)`.
+- `kestraVersion` is pinned to `1.3.27` (bumped up from the template's `1.2.5`): `@PluginProperty(secret = true)` — required by the `plugin-doc-lint` CI check on `accessToken` — only exists from `io.kestra:model` `1.3.12` onward. Do not downgrade below `1.3.12` without re-adding a `@ToString.Exclude`-only masking fallback and re-checking every other API surface used here (`HttpClient`, `FetchType`, `PollingTriggerInterface`, KV store) for version drift.
+- `@Min`/`@Max`/`@DecimalMin`/`@DecimalMax` bean-validation annotations on a `Property<Number>` field threw `jakarta.validation.UnexpectedTypeException` at task-run time on the previous pinned core version (1.2.5); `ExportImage.scale` validates its bounds manually in `run()` instead of via annotations. Re-verify whether Hibernate Validator's `Property<T>` unwrapping now supports these constraints before reinstating them.
 - Kestra's HTTP client's `bodyHandler` special-cases `String.class` and `Byte[].class` (boxed) responses; requesting `byte[].class` (primitive) falls through to Jackson JSON deserialization and fails on any non-base64 JSON body. `FigmaApi.request` requests `String.class` and parses the JSON itself for this reason — keep that pattern for any new call site.
 
 ## References

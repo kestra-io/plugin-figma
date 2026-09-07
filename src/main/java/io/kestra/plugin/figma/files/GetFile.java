@@ -30,13 +30,13 @@ import java.util.Map;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Get a Figma file's document structure.",
+    title = "Get a Figma file's document structure",
     description = "Calls the Figma `GET /v1/files/:key` endpoint. File documents can be very large, so `fetchType` defaults to `STORE`."
 )
 @Plugin(
     examples = {
         @Example(
-            title = "Store a Figma file's document structure to internal storage.",
+            title = "Store a Figma file's document structure to internal storage",
             full = true,
             code = """
                 id: figma_get_file
@@ -53,33 +53,33 @@ import java.util.Map;
 )
 public class GetFile extends AbstractFigmaTask implements RunnableTask<FigmaFetchOutput> {
     @NotNull
-    @Schema(title = "The Figma file key.", description = "Found in the file's URL: `https://www.figma.com/file/:fileKey/...`.")
+    @Schema(title = "The Figma file key", description = "Found in the file's URL: `https://www.figma.com/file/:fileKey/...`.")
     @PluginProperty(group = "main")
     private Property<String> fileKey;
 
-    @Schema(title = "A list of node IDs to limit the traversal to.", description = "By default the whole document is returned.")
+    @Schema(title = "A list of node IDs to limit the traversal to", description = "By default the whole document is returned.")
     @PluginProperty(group = "processing")
     private Property<List<String>> ids;
 
-    @Schema(title = "Depth of the node tree to traverse.", description = "For example `1` returns only the root and its direct children.")
+    @Schema(title = "Depth of the node tree to traverse", description = "For example `1` returns only the root and its direct children.")
     @PluginProperty(group = "processing")
     private Property<Integer> depth;
 
-    @Schema(title = "Geometry data to include.", description = "Set to `paths` to export vector data.")
+    @Schema(title = "Geometry data to include", description = "Set to `paths` to export vector data.")
     @PluginProperty(group = "processing")
     private Property<String> geometry;
 
-    @Schema(title = "A specific file version ID to retrieve.", description = "By default the latest version is returned.")
+    @Schema(title = "A specific file version ID to retrieve", description = "By default the latest version is returned.")
     @PluginProperty(group = "source")
     private Property<String> fileVersion;
 
-    @Schema(title = "Whether to include branch metadata in the response.", description = "This plugin passes `branchData` through as-is; it does not resolve or diff branches.")
+    @Schema(title = "Whether to include branch metadata in the response", description = "This plugin passes `branchData` through as-is; it does not resolve or diff branches.")
     @PluginProperty(group = "source")
     private Property<Boolean> branchData;
 
     @NotNull
     @Schema(
-        title = "How to handle the fetched file document.",
+        title = "How to handle the fetched file document",
         description = "Defaults to `STORE` because file documents can be large — storing to internal storage avoids loading the whole JSON tree into the execution context. Use `FETCH`/`FETCH_ONE` only for small files."
     )
     @PluginProperty(group = "processing")

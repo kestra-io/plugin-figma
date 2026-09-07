@@ -23,13 +23,13 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Delete a comment on a Figma file.",
+    title = "Delete a comment on a Figma file",
     description = "Calls the Figma `DELETE /v1/files/:key/comments/:comment_id` endpoint."
 )
 @Plugin(
     examples = {
         @Example(
-            title = "Delete a comment on a Figma file.",
+            title = "Delete a comment on a Figma file",
             full = true,
             code = """
                 id: figma_delete_comment
@@ -47,12 +47,12 @@ import lombok.experimental.SuperBuilder;
 )
 public class DeleteComment extends AbstractFigmaTask implements RunnableTask<VoidOutput> {
     @NotNull
-    @Schema(title = "The Figma file key.", description = "Found in the file's URL: `https://www.figma.com/file/:fileKey/...`.")
+    @Schema(title = "The Figma file key", description = "Found in the file's URL: `https://www.figma.com/file/:fileKey/...`.")
     @PluginProperty(group = "main")
     private Property<String> fileKey;
 
     @NotNull
-    @Schema(title = "The ID of the comment to delete.")
+    @Schema(title = "The ID of the comment to delete")
     @PluginProperty(group = "main")
     private Property<String> commentId;
 

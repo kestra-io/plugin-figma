@@ -29,13 +29,13 @@ import java.util.Map;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "List the files of a Figma project.",
+    title = "List the files of a Figma project",
     description = "Calls the Figma `GET /v1/projects/:project_id/files` endpoint."
 )
 @Plugin(
     examples = {
         @Example(
-            title = "List all files of a Figma project.",
+            title = "List all files of a Figma project",
             full = true,
             code = """
                 id: figma_list_project_files
@@ -52,16 +52,16 @@ import java.util.Map;
 )
 public class ListProjectFiles extends AbstractFigmaTask implements RunnableTask<FigmaFetchOutput> {
     @NotNull
-    @Schema(title = "The Figma project ID.")
+    @Schema(title = "The Figma project ID")
     @PluginProperty(group = "main")
     private Property<String> projectId;
 
-    @Schema(title = "Whether to include branch metadata in the response.", description = "This plugin passes `branchData` through as-is; it does not resolve or diff branches.")
+    @Schema(title = "Whether to include branch metadata in the response", description = "This plugin passes `branchData` through as-is; it does not resolve or diff branches.")
     @PluginProperty(group = "processing")
     private Property<Boolean> branchData;
 
     @NotNull
-    @Schema(title = "How to handle the fetched files.")
+    @Schema(title = "How to handle the fetched files")
     @PluginProperty(group = "processing")
     @Builder.Default
     private Property<FetchType> fetchType = Property.ofValue(FetchType.FETCH);

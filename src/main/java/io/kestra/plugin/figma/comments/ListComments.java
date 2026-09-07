@@ -29,13 +29,13 @@ import java.util.Map;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "List the comments on a Figma file.",
+    title = "List the comments on a Figma file",
     description = "Calls the Figma `GET /v1/files/:key/comments` endpoint."
 )
 @Plugin(
     examples = {
         @Example(
-            title = "List all comments on a Figma file.",
+            title = "List all comments on a Figma file",
             full = true,
             code = """
                 id: figma_list_comments
@@ -52,16 +52,16 @@ import java.util.Map;
 )
 public class ListComments extends AbstractFigmaTask implements RunnableTask<FigmaFetchOutput> {
     @NotNull
-    @Schema(title = "The Figma file key.", description = "Found in the file's URL: `https://www.figma.com/file/:fileKey/...`.")
+    @Schema(title = "The Figma file key", description = "Found in the file's URL: `https://www.figma.com/file/:fileKey/...`.")
     @PluginProperty(group = "main")
     private Property<String> fileKey;
 
-    @Schema(title = "Whether to return comment messages as markdown instead of plain text.")
+    @Schema(title = "Whether to return comment messages as markdown instead of plain text")
     @PluginProperty(group = "processing")
     private Property<Boolean> asMd;
 
     @NotNull
-    @Schema(title = "How to handle the fetched comments.")
+    @Schema(title = "How to handle the fetched comments")
     @PluginProperty(group = "processing")
     @Builder.Default
     private Property<FetchType> fetchType = Property.ofValue(FetchType.FETCH);

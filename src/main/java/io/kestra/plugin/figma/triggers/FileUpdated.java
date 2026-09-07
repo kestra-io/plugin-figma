@@ -37,7 +37,7 @@ import java.util.Optional;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Trigger a flow when a Figma file is modified.",
+    title = "Trigger a flow when a Figma file is modified",
     description = """
         Polls the Figma `GET /v1/files/:key?depth=1` endpoint and compares the response's \
         `lastModified` timestamp against the last value seen for this trigger. The first evaluation \
@@ -48,7 +48,7 @@ import java.util.Optional;
 @Plugin(
     examples = {
         @Example(
-            title = "Trigger a flow whenever a Figma file changes.",
+            title = "Trigger a flow whenever a Figma file changes",
             full = true,
             code = """
                 id: figma_file_updated
@@ -71,31 +71,29 @@ import java.util.Optional;
 )
 public class FileUpdated extends AbstractTrigger implements PollingTriggerInterface, TriggerOutput<FileUpdated.Output> {
     @NotNull
-    @Schema(title = "The interval between two polls.")
+    @Schema(title = "The interval between two polls")
     @PluginProperty(group = "execution")
     @Builder.Default
     private Duration interval = Duration.ofMinutes(5);
 
     @NotNull
-    @Schema(title = "The Figma file key to watch.", description = "Found in the file's URL: `https://www.figma.com/file/:fileKey/...`.")
+    @Schema(title = "The Figma file key to watch", description = "Found in the file's URL: `https://www.figma.com/file/:fileKey/...`.")
     @PluginProperty(group = "main")
     private Property<String> fileKey;
 
     @Schema(
-        title = "Figma access token.",
+        title = "Figma access token",
         description = """
             A personal access token generated from your Figma account settings, scoped to at least \
             file read access. A valid OAuth 2.0 access token obtained through your own authorization \
             flow also works — this plugin does not implement the OAuth flow itself."""
     )
-    // The `secret` attribute of `@PluginProperty` is not available on the Kestra core version this
-    // plugin targets (1.2.5); `@ToString.Exclude` below keeps the token out of logs/toString instead.
-    @PluginProperty(group = "connection")
+    @PluginProperty(group = "connection", secret = true)
     @ToString.Exclude
     @NotNull
     private Property<String> accessToken;
 
-    @Schema(title = "Figma API base URL.", description = "Defaults to the public Figma REST API. Override only to point at a self-hosted proxy or a test server.")
+    @Schema(title = "Figma API base URL", description = "Defaults to the public Figma REST API. Override only to point at a self-hosted proxy or a test server.")
     @PluginProperty(group = "connection")
     @Builder.Default
     private Property<String> baseUrl = Property.ofValue(FigmaApi.DEFAULT_BASE_URL);
@@ -165,10 +163,10 @@ public class FileUpdated extends AbstractTrigger implements PollingTriggerInterf
     @Builder
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
-        @Schema(title = "The Figma file key that changed.")
+        @Schema(title = "The Figma file key that changed")
         private final String fileKey;
 
-        @Schema(title = "The file's new `lastModified` timestamp.")
+        @Schema(title = "The file's new `lastModified` timestamp")
         private final Instant lastModified;
     }
 }

@@ -26,7 +26,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Get the local variables and variable collections of a Figma file.",
+    title = "Get the local variables and variable collections of a Figma file",
     description = """
         Calls the Figma `GET /v1/files/:file_key/variables/local` endpoint. **Requires a Figma \
         Enterprise organization plan with variables enabled** — a 403 response is mapped to a \
@@ -37,7 +37,7 @@ import lombok.experimental.SuperBuilder;
 @Plugin(
     examples = {
         @Example(
-            title = "Get the local variables of a Figma file (Enterprise plan required).",
+            title = "Get the local variables of a Figma file (Enterprise plan required)",
             full = true,
             code = """
                 id: figma_get_local_variables
@@ -54,12 +54,12 @@ import lombok.experimental.SuperBuilder;
 )
 public class GetLocalVariables extends AbstractFigmaTask implements RunnableTask<FigmaFetchOutput> {
     @NotNull
-    @Schema(title = "The Figma file key.", description = "Found in the file's URL: `https://www.figma.com/file/:fileKey/...`.")
+    @Schema(title = "The Figma file key", description = "Found in the file's URL: `https://www.figma.com/file/:fileKey/...`.")
     @PluginProperty(group = "main")
     private Property<String> fileKey;
 
     @NotNull
-    @Schema(title = "How to handle the fetched variables.")
+    @Schema(title = "How to handle the fetched variables")
     @PluginProperty(group = "processing")
     @Builder.Default
     private Property<FetchType> fetchType = Property.ofValue(FetchType.FETCH_ONE);
