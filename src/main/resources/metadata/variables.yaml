@@ -1,0 +1,8 @@
+group: io.kestra.plugin.figma.variables
+name: "variables"
+title: "Variables"
+description: "Read and write Figma variables and variable collections. Requires a Figma Enterprise organization plan."
+body: "Get a file's local or published variables, or bulk create/update/delete variables, variable collections, modes, and mode values. All three tasks require a Figma Enterprise organization plan with variables enabled."
+videos: []
+createdBy: "Kestra Core Team"
+managedBy: "Kestra Core Team"

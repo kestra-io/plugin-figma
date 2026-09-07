@@ -1,0 +1,8 @@
+group: io.kestra.plugin.figma.triggers
+name: "triggers"
+title: "Triggers"
+description: "Poll Figma files for changes and start a flow execution."
+body: "Poll a Figma file and start an execution whenever its `lastModified` timestamp advances."
+videos: []
+createdBy: "Kestra Core Team"
+managedBy: "Kestra Core Team"

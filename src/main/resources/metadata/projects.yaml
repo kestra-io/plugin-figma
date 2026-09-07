@@ -1,0 +1,8 @@
+group: io.kestra.plugin.figma.projects
+name: "projects"
+title: "Projects"
+description: "List Figma team projects and the files within a project."
+body: "List all projects of a team, or all files within a project."
+videos: []
+createdBy: "Kestra Core Team"
+managedBy: "Kestra Core Team"
