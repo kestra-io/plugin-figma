@@ -1,6 +1,7 @@
 package io.kestra.plugin.figma.triggers;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.kestra.core.exceptions.ResourceExpiredException;
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.annotations.PluginProperty;
@@ -13,10 +14,6 @@ import io.kestra.core.models.triggers.TriggerContext;
 import io.kestra.core.models.triggers.TriggerOutput;
 import io.kestra.core.models.triggers.TriggerService;
 import io.kestra.core.runners.RunContext;
-import io.kestra.core.storages.kv.KVMetadata;
-import io.kestra.core.storages.kv.KVStore;
-import io.kestra.core.storages.kv.KVValue;
-import io.kestra.core.storages.kv.KVValueAndMetadata;
 import io.kestra.plugin.figma.FigmaApi;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
@@ -28,6 +25,8 @@ import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.slf4j.Logger;
 
+import java.io.FileNotFoundException;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
@@ -71,6 +70,9 @@ import java.util.Optional;
     }
 )
 public class FileUpdated extends AbstractTrigger implements PollingTriggerInterface, TriggerOutput<FileUpdated.Output> {
+    private static final String STATE_NAME = "figma-file-updated";
+    private static final String STATE_SUB_NAME = "last-modified";
+
     @NotNull
     @Schema(title = "The interval between two polls")
     @PluginProperty(group = "execution")
@@ -124,23 +126,24 @@ public class FileUpdated extends AbstractTrigger implements PollingTriggerInterf
             throw new IllegalStateException("Figma file '" + rFileKey + "' response did not include a `lastModified` field — unexpected response shape.");
         }
 
-        KVStore kvStore = runContext.namespaceKv(triggerContext.getNamespace());
-        String watermarkKey = watermarkKey(triggerContext, rFileKey);
-        Optional<KVValue> stored = kvStore.getValue(watermarkKey);
+        // scopes the state to this trigger instance and file: RunContext.stateStore() already scopes
+        // by flow, so this only needs to further disambiguate multiple FileUpdated triggers on the
+        // same flow (or the same trigger watching more than one file across polls).
+        String stateValue = triggerContext.getTriggerId() + "_" + rFileKey;
+        String previousLastModified = readWatermark(runContext, stateValue);
 
-        if (stored.isEmpty()) {
-            kvStore.put(watermarkKey, new KVValueAndMetadata(new KVMetadata(null, (Duration) null), lastModified), true);
+        if (previousLastModified == null) {
+            // first evaluation: record the baseline without firing, to avoid a spurious run when the trigger is first enabled
+            putWatermark(runContext, stateValue, lastModified);
             return Optional.empty();
         }
 
         Instant current = Instant.parse(lastModified);
-        Instant previous = Instant.parse(String.valueOf(stored.get().value()));
+        Instant previous = Instant.parse(previousLastModified);
 
         if (!current.isAfter(previous)) {
             return Optional.empty();
         }
-
-        kvStore.put(watermarkKey, new KVValueAndMetadata(new KVMetadata(null, (Duration) null), lastModified), true);
 
         logger.info("Figma file '{}' changed, lastModified advanced from '{}' to '{}'", rFileKey, previous, current);
 
@@ -149,21 +152,24 @@ public class FileUpdated extends AbstractTrigger implements PollingTriggerInterf
             .lastModified(current)
             .build());
 
+        // persist the watermark only once the execution has actually been built: if the scheduler
+        // crashes before this point, the next poll re-fires (a recoverable duplicate) instead of
+        // silently dropping the change (which an earlier watermark write would cause)
+        putWatermark(runContext, stateValue, lastModified);
+
         return Optional.of(execution);
     }
 
-    /**
-     * Length-prefixes each identifier segment so that, e.g., a flowId of "ab" and triggerId "c"
-     * can never collide with flowId "a" and triggerId "bc".
-     */
-    private static String watermarkKey(TriggerContext triggerContext, String fileKey) {
-        String flowId = triggerContext.getFlowId();
-        String triggerId = triggerContext.getTriggerId();
+    private static String readWatermark(RunContext runContext, String stateValue) throws Exception {
+        try (var stream = runContext.stateStore().getState(STATE_NAME, STATE_SUB_NAME, stateValue)) {
+            return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (FileNotFoundException | ResourceExpiredException e) {
+            return null;
+        }
+    }
 
-        return "figma_file_updated_"
-            + flowId.length() + "_" + flowId + "_"
-            + triggerId.length() + "_" + triggerId + "_"
-            + fileKey.length() + "_" + fileKey;
+    private static void putWatermark(RunContext runContext, String stateValue, String lastModified) throws Exception {
+        runContext.stateStore().putState(STATE_NAME, STATE_SUB_NAME, stateValue, lastModified.getBytes(StandardCharsets.UTF_8));
     }
 
     @Builder

@@ -19,6 +19,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
@@ -55,6 +56,33 @@ class GetFileTest {
 
         assertThat(output.getRow(), is(notNullValue()));
         assertThat(output.getRow().get("name"), is("Test File"));
+        assertThat(output.getUri(), is(nullValue()));
+    }
+
+    @Test
+    void fetch() throws Exception {
+        wireMock.stubFor(get(urlPathEqualTo("/files/abc123"))
+            .willReturn(okJson("""
+                {"name": "Test File", "lastModified": "2024-01-01T00:00:00Z", "document": {"id": "0:0"}}
+                """)));
+
+        GetFile task = GetFile.builder()
+            .id(UUID.randomUUID().toString())
+            .type(GetFile.class.getName())
+            .accessToken(Property.ofValue("token"))
+            .baseUrl(Property.ofValue(wireMock.getRuntimeInfo().getHttpBaseUrl()))
+            .fileKey(Property.ofValue("abc123"))
+            .fetchType(Property.ofValue(FetchType.FETCH))
+            .build();
+
+        RunContext runContext = runContextFactory.of(task, Map.of());
+
+        FigmaFetchOutput output = task.run(runContext);
+
+        assertThat(output.getRow(), is(notNullValue()));
+        assertThat(output.getRow().get("name"), is("Test File"));
+        assertThat(output.getRows(), hasSize(1));
+        assertThat(output.getSize(), is(1L));
         assertThat(output.getUri(), is(nullValue()));
     }
 

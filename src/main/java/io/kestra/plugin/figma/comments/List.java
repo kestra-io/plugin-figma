@@ -43,14 +43,14 @@ import java.util.Map;
 
                 tasks:
                   - id: list_comments
-                    type: io.kestra.plugin.figma.comments.ListComments
+                    type: io.kestra.plugin.figma.comments.List
                     accessToken: "{{ secret('FIGMA_ACCESS_TOKEN') }}"
                     fileKey: "abc123XYZ"
                 """
         )
     }
 )
-public class ListComments extends AbstractFigmaTask implements RunnableTask<FigmaFetchOutput> {
+public class List extends AbstractFigmaTask implements RunnableTask<FigmaFetchOutput> {
     @NotNull
     @Schema(title = "The Figma file key", description = "Found in the file's URL: `https://www.figma.com/file/:fileKey/...`.")
     @PluginProperty(group = "main")

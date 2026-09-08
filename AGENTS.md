@@ -20,10 +20,10 @@ Single-module plugin. Source packages under `io.kestra.plugin.figma`:
 
 - `io.kestra.plugin.figma` — shared plumbing: `AbstractFigmaTask` (accessToken/baseUrl + authenticated request helpers + shared `fetchType` output handling), `FigmaApi` (static HTTP/JSON/error-mapping helpers, also used directly by the trigger since a Task and a Trigger cannot share a superclass), `FigmaApiException`, `FigmaFetchOutput`.
 - `io.kestra.plugin.figma.files` — `GetFile`, `ExportImage`.
-- `io.kestra.plugin.figma.comments` — `ListComments`, `CreateComment`, `DeleteComment`.
+- `io.kestra.plugin.figma.comments` — `List`, `Create`, `Delete` (no `Comment` suffix — the package already scopes them, matching the convention used elsewhere in the org, e.g. `io.kestra.plugin.github.issues`).
 - `io.kestra.plugin.figma.projects` — `ListTeamProjects`, `ListProjectFiles`.
 - `io.kestra.plugin.figma.variables` — `GetLocalVariables`, `GetPublishedVariables`, `UpdateVariables` (all three require a Figma Enterprise organization plan; 403 responses are mapped to a dedicated error).
-- `io.kestra.plugin.figma.triggers` — `FileUpdated`, a polling trigger that watermarks the last-seen `lastModified` per file in the flow's namespace KV Store.
+- `io.kestra.plugin.figma.triggers` — `FileUpdated`, a polling trigger that watermarks the last-seen `lastModified` per file via `RunContext.stateStore()`.
 
 No infrastructure dependencies (Docker Compose services) — the plugin only calls the Figma REST API; unit tests stub it with WireMock.
 
@@ -32,9 +32,9 @@ No infrastructure dependencies (Docker Compose services) — the plugin only cal
 - `io.kestra.plugin.figma.AbstractFigmaTask`
 - `io.kestra.plugin.figma.files.GetFile`
 - `io.kestra.plugin.figma.files.ExportImage`
-- `io.kestra.plugin.figma.comments.ListComments`
-- `io.kestra.plugin.figma.comments.CreateComment`
-- `io.kestra.plugin.figma.comments.DeleteComment`
+- `io.kestra.plugin.figma.comments.List`
+- `io.kestra.plugin.figma.comments.Create`
+- `io.kestra.plugin.figma.comments.Delete`
 - `io.kestra.plugin.figma.projects.ListTeamProjects`
 - `io.kestra.plugin.figma.projects.ListProjectFiles`
 - `io.kestra.plugin.figma.variables.GetLocalVariables`

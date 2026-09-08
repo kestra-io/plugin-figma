@@ -100,13 +100,26 @@ public abstract class AbstractFigmaTask extends Task {
             return output.build();
         }
 
+        // `path()` on the raw response yields a MissingNode (not null) when the expected field is
+        // absent — a proxy-rewritten body, an empty response, or a Figma API shape change would
+        // otherwise fall through to an opaque Jackson deserialization error below.
+        if (node.isMissingNode()) {
+            throw new IllegalStateException(
+                "The Figma API response did not include the expected field — unexpected response shape " +
+                    "(this can happen with an empty response body, a changed Figma API response, or a rewriting proxy in front of the API)."
+            );
+        }
+
         if (node.isArray()) {
             List<Object> rows = JacksonMapper.ofJson().convertValue(node, JacksonMapper.LIST_TYPE_REFERENCE);
             long total = rows.size();
 
             return switch (fetchType) {
                 case FETCH -> output.rows(rows).size(total).total(total).build();
-                case FETCH_ONE -> output.row(rows.isEmpty() ? null : toMap(rows.getFirst())).total(total).build();
+                case FETCH_ONE -> {
+                    Map<String, Object> first = rows.isEmpty() ? null : toMap(rows.getFirst());
+                    yield output.row(first).size(first == null ? 0L : 1L).total(total).build();
+                }
                 case STORE -> output.uri(store(runContext, node)).size(total).total(total).build();
                 case NONE -> output.build();
             };
@@ -115,7 +128,10 @@ public abstract class AbstractFigmaTask extends Task {
         Map<String, Object> row = JacksonMapper.ofJson().convertValue(node, JacksonMapper.MAP_TYPE_REFERENCE);
 
         return switch (fetchType) {
-            case FETCH, FETCH_ONE -> output.row(row).build();
+            // wrap the single object in a one-element `rows` list too, so `FETCH` keeps its documented
+            // `rows`/`total` contract even for object-shaped responses (a file document, a variables `meta` block)
+            case FETCH -> output.row(row).rows(List.of(row)).size(1L).build();
+            case FETCH_ONE -> output.row(row).size(1L).build();
             case STORE -> output.uri(store(runContext, node)).size(1L).build();
             case NONE -> output.build();
         };
@@ -123,6 +139,10 @@ public abstract class AbstractFigmaTask extends Task {
 
     @SuppressWarnings("unchecked")
     private static Map<String, Object> toMap(Object row) {
+        if (!(row instanceof Map)) {
+            throw new IllegalStateException("Expected object rows in Figma response, got: " + row);
+        }
+
         return (Map<String, Object>) row;
     }
 

@@ -57,6 +57,22 @@ class UpdateVariablesTest {
     }
 
     @Test
+    void allEmptyChangeListsFailFast() throws Exception {
+        UpdateVariables task = UpdateVariables.builder()
+            .id(UUID.randomUUID().toString())
+            .type(UpdateVariables.class.getName())
+            .accessToken(Property.ofValue("token"))
+            .baseUrl(Property.ofValue(wireMock.getRuntimeInfo().getHttpBaseUrl()))
+            .fileKey(Property.ofValue("abc123"))
+            .build();
+
+        RunContext runContext = runContextFactory.of(task, Map.of());
+
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> task.run(runContext));
+        assertThat(e.getMessage(), containsString("variableCollections"));
+    }
+
+    @Test
     void enterprisePlanRequired() throws Exception {
         wireMock.stubFor(post(urlPathEqualTo("/files/abc123/variables"))
             .willReturn(aResponse().withStatus(403).withBody("{\"err\": \"Forbidden\", \"status\": 403}")));

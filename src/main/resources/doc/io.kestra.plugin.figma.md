@@ -17,18 +17,18 @@ The three `variables.*` tasks (`GetLocalVariables`, `GetPublishedVariables`, `Up
 
 ## Tasks
 
-Tasks that support `fetchType` (`files.GetFile`, `comments.ListComments`, `projects.ListTeamProjects`, `projects.ListProjectFiles`, `variables.GetLocalVariables`, `variables.GetPublishedVariables`) all share the same output shape: `rows`/`total` for `FETCH`, a single `row` for `FETCH_ONE`, or `uri`/`size` when `STORE`s the payload to Kestra's internal storage. `files.GetFile` defaults `fetchType` to `STORE` because file documents can be very large.
+Tasks that support `fetchType` (`files.GetFile`, `comments.List`, `projects.ListTeamProjects`, `projects.ListProjectFiles`, `variables.GetLocalVariables`, `variables.GetPublishedVariables`) all share the same output shape: `rows`/`total` for `FETCH`, a single `row` for `FETCH_ONE`, or `uri`/`size` when `STORE`s the payload to Kestra's internal storage. `files.GetFile` defaults `fetchType` to `STORE` because file documents can be very large.
 
 ### Files
 
-- `files.GetFile` — get a file's document structure (`GET /v1/files/:key`). Required: `fileKey`. Optional: `ids`, `depth`, `geometry`, `version`, `branchData`.
-- `files.ExportImage` — export one or more nodes as images (`GET /v1/images/:key`). Required: `fileKey`, `nodeIds`. Optional: `format` (`PNG`/`JPG`/`SVG`/`PDF`), `scale`, `svgIncludeId`, `useAbsoluteBounds`. The Figma endpoint returns temporary, expiring URLs rather than image bytes — this task downloads every URL in the same run and stores the images internally; the raw Figma URLs are never exposed as output. A per-node render failure fails the whole task, listing the failed node IDs.
+- `files.GetFile` — get a file's document structure (`GET /v1/files/:key`). Required: `fileKey`. Optional: `ids`, `depth`, `geometry`, `fileVersion`, `branchData`.
+- `files.ExportImage` — export one or more nodes as images (`GET /v1/images/:key`). Required: `fileKey`, `nodeIds`. Optional: `format` (`PNG`/`JPG`/`SVG`/`PDF`), `scale`, `svgIncludeId`, `useAbsoluteBounds`. Downloads every returned image in the same run and stores them internally, rather than exposing Figma's raw (and short-lived) URLs as output. A per-node render failure fails the whole task, listing the failed node IDs. Accepts either dash form (`1-2`) or colon form (`1:2`) node IDs.
 
 ### Comments
 
-- `comments.ListComments` — list a file's comments (`GET /v1/files/:key/comments`). Required: `fileKey`. Optional: `asMd`.
-- `comments.CreateComment` — post a comment (`POST /v1/files/:key/comments`). Required: `fileKey`, `message`. Optional: `commentId` (reply to an existing comment), `clientMeta` (pin to a canvas position or a node).
-- `comments.DeleteComment` — delete a comment (`DELETE /v1/files/:key/comments/:comment_id`). Required: `fileKey`, `commentId`.
+- `comments.List` — list a file's comments (`GET /v1/files/:key/comments`). Required: `fileKey`. Optional: `asMd`.
+- `comments.Create` — post a comment (`POST /v1/files/:key/comments`). Required: `fileKey`, `message`. Optional: `commentId` (reply to an existing comment), `clientMeta` (pin to a canvas position or a node).
+- `comments.Delete` — delete a comment (`DELETE /v1/files/:key/comments/:comment_id`). Required: `fileKey`, `commentId`.
 
 ### Projects
 

@@ -101,6 +101,13 @@ public class UpdateVariables extends AbstractFigmaTask implements RunnableTask<U
         putIfNotEmpty(body, "variables", runContext.render(this.variables).asList(Map.class));
         putIfNotEmpty(body, "variableModeValues", runContext.render(this.variableModeValues).asList(Map.class));
 
+        if (body.isEmpty()) {
+            throw new IllegalArgumentException(
+                "At least one of `variableCollections`, `variableModes`, `variables`, or `variableModeValues` must be non-empty — " +
+                    "otherwise this task would call the Figma API with no changes and report success having changed nothing."
+            );
+        }
+
         JsonNode response;
         try {
             response = this.post(runContext, "/files/" + FigmaApi.encodePathSegment(rFileKey) + "/variables", body);

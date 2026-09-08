@@ -41,7 +41,7 @@ import java.util.Map;
 
                 tasks:
                   - id: create_comment
-                    type: io.kestra.plugin.figma.comments.CreateComment
+                    type: io.kestra.plugin.figma.comments.Create
                     accessToken: "{{ secret('FIGMA_ACCESS_TOKEN') }}"
                     fileKey: "abc123XYZ"
                     message: "This flow finished the design review."
@@ -52,7 +52,7 @@ import java.util.Map;
         )
     }
 )
-public class CreateComment extends AbstractFigmaTask implements RunnableTask<CreateComment.Output> {
+public class Create extends AbstractFigmaTask implements RunnableTask<Create.Output> {
     @NotNull
     @Schema(title = "The Figma file key", description = "Found in the file's URL: `https://www.figma.com/file/:fileKey/...`.")
     @PluginProperty(group = "main")
@@ -91,12 +91,11 @@ public class CreateComment extends AbstractFigmaTask implements RunnableTask<Cre
 
         JsonNode response = this.post(runContext, "/files/" + FigmaApi.encodePathSegment(rFileKey) + "/comments", body);
 
-        String id = response.path("id").asText(null);
-        if (id == null) {
+        if (!response.hasNonNull("id")) {
             throw new IllegalStateException("Figma did not return an `id` for the created comment — unexpected response shape: " + response);
         }
 
-        return Output.builder().id(id).build();
+        return Output.builder().id(response.path("id").asText()).build();
     }
 
     @Builder

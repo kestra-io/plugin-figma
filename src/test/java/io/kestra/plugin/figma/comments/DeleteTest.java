@@ -23,7 +23,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @KestraTest
-class DeleteCommentTest {
+class DeleteTest {
     @RegisterExtension
     static WireMockExtension wireMock = WireMockExtension.newInstance()
         .options(wireMockConfig().dynamicPort())
@@ -37,9 +37,9 @@ class DeleteCommentTest {
         wireMock.stubFor(delete(urlPathEqualTo("/files/abc123/comments/999"))
             .willReturn(aResponse().withStatus(200).withBody("{}")));
 
-        DeleteComment task = DeleteComment.builder()
+        Delete task = Delete.builder()
             .id(UUID.randomUUID().toString())
-            .type(DeleteComment.class.getName())
+            .type(Delete.class.getName())
             .accessToken(Property.ofValue("token"))
             .baseUrl(Property.ofValue(wireMock.getRuntimeInfo().getHttpBaseUrl()))
             .fileKey(Property.ofValue("abc123"))
@@ -56,9 +56,9 @@ class DeleteCommentTest {
         wireMock.stubFor(delete(urlPathEqualTo("/files/abc123/comments/999"))
             .willReturn(aResponse().withStatus(404).withBody("{\"err\": \"Not found\"}")));
 
-        DeleteComment task = DeleteComment.builder()
+        Delete task = Delete.builder()
             .id(UUID.randomUUID().toString())
-            .type(DeleteComment.class.getName())
+            .type(Delete.class.getName())
             .accessToken(Property.ofValue("token"))
             .baseUrl(Property.ofValue(wireMock.getRuntimeInfo().getHttpBaseUrl()))
             .fileKey(Property.ofValue("abc123"))

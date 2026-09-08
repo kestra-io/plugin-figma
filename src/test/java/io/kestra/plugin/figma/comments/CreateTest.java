@@ -20,7 +20,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 @KestraTest
-class CreateCommentTest {
+class CreateTest {
     @RegisterExtension
     static WireMockExtension wireMock = WireMockExtension.newInstance()
         .options(wireMockConfig().dynamicPort())
@@ -36,9 +36,9 @@ class CreateCommentTest {
                 {"id": "999", "message": "Looks good"}
                 """)));
 
-        CreateComment task = CreateComment.builder()
+        Create task = Create.builder()
             .id(UUID.randomUUID().toString())
-            .type(CreateComment.class.getName())
+            .type(Create.class.getName())
             .accessToken(Property.ofValue("token"))
             .baseUrl(Property.ofValue(wireMock.getRuntimeInfo().getHttpBaseUrl()))
             .fileKey(Property.ofValue("abc123"))
@@ -47,7 +47,7 @@ class CreateCommentTest {
 
         RunContext runContext = runContextFactory.of(task, Map.of());
 
-        CreateComment.Output output = task.run(runContext);
+        Create.Output output = task.run(runContext);
 
         assertThat(output.getId(), is("999"));
     }

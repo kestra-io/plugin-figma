@@ -42,10 +42,9 @@ import java.util.concurrent.atomic.AtomicReference;
 @Schema(
     title = "Export Figma nodes as images",
     description = """
-        Calls the Figma `GET /v1/images/:key` endpoint, which returns temporary URLs (valid for \
-        roughly 30 minutes) rather than image bytes. This task downloads every returned URL in the \
-        same run and stores the images in Kestra's internal storage — the raw, expiring Figma URLs \
-        are never exposed as output."""
+        Calls the Figma `GET /v1/images/:key` endpoint and downloads every returned image in the \
+        same run, storing them in Kestra's internal storage rather than exposing Figma's raw \
+        (and short-lived) URLs as output."""
 )
 @Plugin(
     examples = {
@@ -134,7 +133,7 @@ public class ExportImage extends AbstractFigmaTask implements RunnableTask<Expor
         Map<String, String> urlsToDownload = new LinkedHashMap<>();
 
         for (String nodeId : rNodeIds) {
-            JsonNode url = images.get(nodeId);
+            JsonNode url = lookupImageUrl(images, nodeId);
             if (url == null || url.isNull()) {
                 failedNodeIds.add(nodeId);
             } else {
@@ -156,6 +155,20 @@ public class ExportImage extends AbstractFigmaTask implements RunnableTask<Expor
         }
 
         return Output.builder().images(imageUris).build();
+    }
+
+    /**
+     * Figma normalizes node ids to colon form (`1:2`) in the `images` response map, while a user
+     * commonly pastes the dash form (`1-2`) copied from a Figma share URL's `node-id` query param —
+     * which the request side of this same endpoint accepts. Try both forms before giving up.
+     */
+    private static JsonNode lookupImageUrl(JsonNode images, String nodeId) {
+        JsonNode direct = images.get(nodeId);
+        if (direct != null) {
+            return direct;
+        }
+
+        return images.get(nodeId.contains("-") ? nodeId.replace('-', ':') : nodeId.replace(':', '-'));
     }
 
     private URI downloadToStorage(RunContext runContext, String nodeId, String url, String extension) throws IllegalVariableEvaluationException, IOException {

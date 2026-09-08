@@ -38,7 +38,7 @@ import lombok.experimental.SuperBuilder;
 
                 tasks:
                   - id: delete_comment
-                    type: io.kestra.plugin.figma.comments.DeleteComment
+                    type: io.kestra.plugin.figma.comments.Delete
                     accessToken: "{{ secret('FIGMA_ACCESS_TOKEN') }}"
                     fileKey: "abc123XYZ"
                     commentId: "1234567890"
@@ -46,7 +46,7 @@ import lombok.experimental.SuperBuilder;
         )
     }
 )
-public class DeleteComment extends AbstractFigmaTask implements RunnableTask<VoidOutput> {
+public class Delete extends AbstractFigmaTask implements RunnableTask<VoidOutput> {
     @NotNull
     @Schema(title = "The Figma file key", description = "Found in the file's URL: `https://www.figma.com/file/:fileKey/...`.")
     @PluginProperty(group = "main")

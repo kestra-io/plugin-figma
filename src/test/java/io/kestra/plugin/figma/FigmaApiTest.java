@@ -5,7 +5,7 @@ import io.kestra.core.junit.annotations.KestraTest;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.runners.RunContextFactory;
-import io.kestra.plugin.figma.comments.ListComments;
+import io.kestra.plugin.figma.comments.List;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -42,9 +42,9 @@ class FigmaApiTest {
 
         // any task is enough to obtain a RunContext; FigmaApi.request is the shared entry point
         // used by every task and the trigger, so it's tested directly here rather than per-task.
-        ListComments task = ListComments.builder()
+        List task = List.builder()
             .id(UUID.randomUUID().toString())
-            .type(ListComments.class.getName())
+            .type(List.class.getName())
             .accessToken(Property.ofValue("token"))
             .baseUrl(Property.ofValue(wireMock.getRuntimeInfo().getHttpBaseUrl()))
             .fileKey(Property.ofValue("abc123"))

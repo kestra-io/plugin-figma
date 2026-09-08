@@ -117,6 +117,26 @@ class ExportImageTest {
     }
 
     @Test
+    void dashFormNodeIdResolvesAgainstColonFormResponseKey() throws Exception {
+        wireMock.stubFor(get(urlPathEqualTo("/images/abc123"))
+            .willReturn(okJson("""
+                {"err": null, "images": {"1:2": "%s/downloads/1-2.png"}}
+                """.formatted(wireMock.getRuntimeInfo().getHttpBaseUrl()))));
+
+        wireMock.stubFor(get(urlPathEqualTo("/downloads/1-2.png"))
+            .willReturn(aResponse().withStatus(200).withBody(new byte[]{1, 2, 3})));
+
+        ExportImage task = newTaskBuilder().nodeIds(Property.ofValue(List.of("1-2"))).build();
+
+        RunContext runContext = runContextFactory.of(task, Map.of());
+
+        ExportImage.Output output = task.run(runContext);
+
+        assertThat(output.getImages(), aMapWithSize(1));
+        assertThat(output.getImages().get("1-2").getScheme(), is("kestra"));
+    }
+
+    @Test
     void partialFailure() throws Exception {
         wireMock.stubFor(get(urlPathEqualTo("/images/abc123"))
             .willReturn(okJson("""
