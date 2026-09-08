@@ -1,0 +1,8 @@
+group: io.kestra.plugin.figma.comments
+name: "comments"
+title: "Comments"
+description: "List, create, and delete comments on Figma files."
+body: "List a file's comments, post a new comment (optionally pinned to a canvas position or as a reply), or delete an existing comment."
+videos: []
+createdBy: "Kestra Core Team"
+managedBy: "Kestra Core Team"

@@ -1,0 +1,8 @@
+group: io.kestra.plugin.figma.files
+name: "files"
+title: "Files"
+description: "Read Figma file documents and export node images."
+body: "Get a file's full document structure, or export one or more nodes as PNG/JPG/SVG/PDF images."
+videos: []
+createdBy: "Kestra Core Team"
+managedBy: "Kestra Core Team"
