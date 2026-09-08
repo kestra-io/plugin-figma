@@ -1,8 +1,8 @@
 group: io.kestra.plugin.figma
 name: "figma"
 title: "Figma"
-description: "Figma plugin for Kestra"
-body: ""
+description: "Tasks and triggers to interact with the Figma REST API."
+body: "Read Figma file documents and export node images, manage file comments, list team projects and their files, read and write variables (Enterprise plan required), and trigger a flow whenever a Figma file changes."
 videos: []
 createdBy: "Kestra Core Team"
 managedBy: "Kestra Core Team"
